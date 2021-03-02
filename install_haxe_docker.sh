@@ -20,13 +20,53 @@ function echoConfirm {
 }
 #END HELPER FUNCTIONS <<<<<<<<
 
-tar zxf haxe-binaries.tgz
 
+#echo $0
+DOCKER='/usr/bin/docker'
+
+if [ "$#" -ne 1 ]; then
+    echo -en "\nUsage: $0 TAGNAME \ni.e. : \e[3m $0 4.1.5-buster\n\e[0m"
+    exit 0;
+fi
+
+
+if test -f "$DOCKER" 
+then
+    echoLine "Ok you have docker installed, let's get going";
+else
+    echoConfirm "hmmm Docker is not installed yet, would you like to install (needs reboot)"
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        curl -sSL https://get.docker.com | sh
+        sudo usermod -aG docker pi
+        echoSection "Docker is now installed, but you need to reboot and run this script again."
+        exit 0;
+    else
+        echoWarn "Ok, not running this script any further"
+        exit 0;
+    fi
+fi
+
+mkdir -p ./docker_haxe/
 sudo mkdir -p /usr/local/share/haxe/
-#sudo mkdir -p /usr/local/share/haxe/std
 
-cd docker_haxe
+echoSection "running/getting docker image";
+docker run haxe:$1
 
+echoSection "getting CONTAINERID"
+
+CONTAINERID=`docker ps -aq --latest`
+
+echoLine "copying from container: $CniceONTAINERID"
+
+docker cp $CONTAINERID:/usr/local/bin/haxe ./docker_haxe/
+docker cp $CONTAINERID:/usr/local/bin/haxelib ./docker_haxe/
+docker cp $CONTAINERID:/usr/local/share/haxe/std  ./docker_haxe/
+
+echoLine "creative haxe-binaries.tgz archive for future use"
+tar zcf haxe-binaries.tgz ./docker_haxe
+
+cd ./docker_haxe/
 echoSection "copying haxe and haxelib binaries to /usr/local/bin/"
 sudo cp haxe /usr/local/bin/
 sudo cp haxelib /usr/local/bin/
@@ -49,8 +89,6 @@ echoConfirm "Would you like to setup a Development directory for haxe and haxeli
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
       mkdir -p ~/Development/haxe/{dev,lib}
-      cd ~/Development/haxe/
-      haxelib setup lib
     fi
 
 
