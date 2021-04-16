@@ -51,14 +51,7 @@ function installOpenFLPi {
     haxelib install openfl
     haxelib run openfl setup
 
-    if [ ! -d "/home/pi/Development/haxe/lib" ]
-    then
-        mkdir -p ~/Development/haxe/{dev,lib}
-    fi
-    cd ~/Development/haxe/dev
-    git clone --recursive https://github.com/gepatto/lime
-    haxelib dev lime lime
-    lime rebuild linux -rpi -v
+    echoLine "now copy the RPi/lime.ndll to lime/ndll/RPi/lime.ndll"
 }
 
 
