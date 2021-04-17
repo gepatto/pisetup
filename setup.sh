@@ -53,7 +53,7 @@ function installOpenFLPi {
 
     echoSection "Go to \n* https://patreon.com/gepatto \n*  and become a patron to get the compiled alpha version of the RPi/lime.ndll \n*  then copy the RPi/lime.ndll to lime/ndll/RPi/lime.ndll"
 
-    echoLine "Don't forget to enable the FKMS-driver in raspi-config"
+    echoLine "Don't forget to enable the FKMS-driver in raspi-config->Advanced Options->GL Driver"
 
 }
 
