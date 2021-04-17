@@ -51,7 +51,7 @@ function installOpenFLPi {
     haxelib install openfl
     haxelib run openfl setup
 
-    echoLine "now copy the RPi/lime.ndll to lime/ndll/RPi/lime.ndll"
+    echoSection "Go to \n* https://patreon.com/gepatto \n*  and become a patron to get the compiled alpha version of the RPi/lime.ndll \n*  then copy the RPi/lime.ndll to lime/ndll/RPi/lime.ndll"
 }
 
 
@@ -123,7 +123,7 @@ function menu(){
     echoSection "I want to"
     echo -ne "
 $(ColorGreen '1)') Install Haxe from binaries
-$(ColorGreen '2)') Install openFL for Raspberry Pi 
+$(ColorGreen '3)') Install and setup openFL
 $(ColorGreen '0)') Exit
 $(ColorBlue 'Choose an option:') "
         read a
