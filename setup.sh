@@ -41,7 +41,7 @@ ColorBlue(){
 #END HELPER FUNCTIONS <<<<<<<<
 
 UPDATEONCE=0;
-HAXEVERSION="415"
+HAXEVERSION="423"
 
 function installOpenFLPi {
     
@@ -126,7 +126,7 @@ function menu(){
     echoSection "I want to"
     echo -ne "
 $(ColorGreen '1)') Install Haxe from binaries
-$(ColorGreen '3)') Install and setup openFL
+$(ColorGreen '2)') Install and setup openFL
 $(ColorGreen '0)') Exit
 $(ColorBlue 'Choose an option:') "
         read a
