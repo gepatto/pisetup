@@ -8,36 +8,38 @@ BLUE="[34m"
 PURPLE="[35m"
 TEAL="[36m"
 WHITE="[37m"
+WARN="[38m"
 
 # >>>>>> HELPER FUNCTIONS
 function echoSection {
-    local color="${2:-$YELLOW}"
-    echo -en "\e$color\n--------------------------------------------------------------------------------\n--\n-- " $1 "\n--\n--------------------------------------------------------------------------------\e[37m\n\n"          
+    #local color="${2:-$YELLOW}"
+    echo -en "\e$YELLOW\n--------------------------------------------------------------------------------\n--\n-- " $1 "\n--\n--------------------------------------------------------------------------------\e[$WHITE\n\n"          
 } 
 function echoLine {
     local color="${2:-$YELLOW}"
-    echo -en "\e$color\n-- " $1 "\e[37m"
+    echo -en "\e$color\n-- " $1 "\e$WHITE"
 }
 function echoWarn {
-    echo -en "\e[38m\n--------------------------------------------------------------------------------\n--\n-- " $1 "\n--\n--------------------------------------------------------------------------------\e[37m\n"
+    echo -en "\e$WARN\n--------------------------------------------------------------------------------\n--\n-- " $1 "\n--\n--------------------------------------------------------------------------------\e$WHITE\n"
 }
 function echoFail {
-    echo -en "\e[31m\n--------------------------------------------------------------------------------\n--\n-- " $1 "\n--\n--------------------------------------------------------------------------------\e[37m\n"
+    echo -en "\e$RED\n--------------------------------------------------------------------------------\n--\n-- " $1 "\n--\n--------------------------------------------------------------------------------\e$WHITE\n"
 }
 function echoConfirm {
-    echo -en "\n\e[35m------------------------------------------------------------------------------------\n--\n"
+    echo -en "\n\e$PURPLE------------------------------------------------------------------------------------\n--\n"
     echo -en "--  $1?\n"
     read -p "[Y/n] " -n 1 -r
-    echo -en "\n--\n-----------------------------------------------------------------------------------\e[37m\n"          
+    echo -en "\n--\n-----------------------------------------------------------------------------------\e$WHITE\n"          
 }
 #END HELPER FUNCTIONS <<<<<<<<
 
 INSTALL=1
-TAGNAME="4.1.5-buster"
+TAGNAME="4.2.5-bullseye"
 
 # Get the options
-while getopts ":dt:" option; do
+while getopts ":dtl:" option; do
    case $option in
+      l);; #use tag in this script
       d) INSTALL=0;;
       t) # Enter a name
          # echo $OPTARG
@@ -53,7 +55,10 @@ done
 DOCKER='/usr/bin/docker'
 
 if [ "$#" -lt 1 ]; then
-    echo -en "\nUsage: -t TAGNAME \ni.e. : \e[3m $0 -t 4.1.5-buster\n\e[0m"
+    echo -en "\nUsage: -t TAGNAME | -d | -l \ni.e. : \e[3m $0 -t $TAGNAME\n\e[0m"
+    echo -en "or     \e[3m $0 -l \e[0m ( use tag $TAGNAME defined in this script) \n\e[0m"
+    echo -en "or     \e[3m $0 -d \e[0m ( don't install haxe )  \n\e[0m"
+    
     exit 0;
 fi
 
@@ -79,7 +84,7 @@ mkdir -p ./docker_haxe/
 sudo mkdir -p /usr/local/share/haxe/
 #sudo mkdir -p /usr/local/share/haxe/std
 
-echoSection "running/getting docker image";
+echoSection "running/getting docker image ${TAGNAME}";
 docker run haxe:${TAGNAME}
 
 echoLine "getting CONTAINERID"
@@ -120,6 +125,7 @@ then
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
         mkdir -p ~/Development/haxe/{dev,lib}
+        haxelib setup ~/Development/haxe/lib
     fi
 fi
 
