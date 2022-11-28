@@ -33,12 +33,15 @@ function echoConfirm {
 }
 #END HELPER FUNCTIONS <<<<<<<<
 
-INSTALL=1
+DOCKER='/usr/bin/docker'
 TAGNAME="4.2.5-bullseye"
+USEARCHIVE=0
+INSTALL=1
 
 # Get the options
-while getopts ":dtl:" option; do
+while getopts ":adtl:" option; do
    case $option in
+      a) USEARCHIVE=1;; #use binary_archive
       l);; #use tag in this script
       d) INSTALL=0;;
       t) # Enter a name
@@ -50,55 +53,56 @@ while getopts ":dtl:" option; do
    esac
 done
 
+if [ $USEARCHIVE -eq 0 ] 
+    #echo $0
+   
 
-#echo $0
-DOCKER='/usr/bin/docker'
-
-if [ "$#" -lt 1 ]; then
-    echo -en "\nUsage: -t TAGNAME | -d | -l \ni.e. : \e[3m $0 -t $TAGNAME\n\e[0m"
-    echo -en "or     \e[3m $0 -l \e[0m ( use tag $TAGNAME defined in this script) \n\e[0m"
-    echo -en "or     \e[3m $0 -d \e[0m ( don't install haxe )  \n\e[0m"
-    
-    exit 0;
-fi
-
-
-if test -f "$DOCKER" 
-then
-    echoSection "Ok you have docker installed, let's get going" $GREEN
-else
-    echoConfirm "hmmm Docker is not installed yet, would you like to install (needs reboot)"
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        curl -sSL https://get.docker.com | sh
-        sudo usermod -aG docker pi
-        echoSection "Docker is now installed, but you need to reboot and run this script again."
-        exit 0;
-    else
-        echoWarn "Ok, not running this script any further"
+    if [ "$#" -lt 1 ]; then
+        echo -en "\nUsage: -t TAGNAME | -d | -l \ni.e. : \e[3m $0 -t $TAGNAME\n\e[0m"
+        echo -en "or     \e[3m $0 -l \e[0m ( use tag $TAGNAME defined in this script) \n\e[0m"
+        echo -en "or     \e[3m $0 -d \e[0m ( don't install haxe )  \n\e[0m"
+        echo -en "or     \e[3m $0 -a \e[0m ( install from archive )  \n\e[0m"
+        
         exit 0;
     fi
+
+
+    if test -f "$DOCKER" 
+    then
+        echoSection "Ok you have docker installed, let's get going" $GREEN
+    else
+        echoConfirm "hmmm Docker is not installed yet, would you like to install (needs reboot)"
+        if [[ $REPLY =~ ^[Yy]$ ]]
+        then
+            curl -sSL https://get.docker.com | sh
+            sudo usermod -aG docker pi
+            echoSection "Docker is now installed, but you need to reboot and run this script again."
+            exit 0;
+        else
+            echoWarn "Ok, not running this script any further"
+            exit 0;
+        fi
+    fi
+
+    mkdir -p ./docker_haxe/
+    sudo mkdir -p /usr/local/share/haxe/
+    #sudo mkdir -p /usr/local/share/haxe/std
+
+    echoSection "running/getting docker image ${TAGNAME}";
+    docker run haxe:${TAGNAME}
+
+    echoLine "getting CONTAINERID"
+
+    CONTAINERID=`docker ps -aq --latest`
+
+    echoLine "copying from container: $CONTAINERID"
+    docker cp $CONTAINERID:/usr/local/bin/haxe ./docker_haxe/
+    docker cp $CONTAINERID:/usr/local/bin/haxelib ./docker_haxe/
+    docker cp $CONTAINERID:/usr/local/share/haxe/std  ./docker_haxe/
+
+    echoLine "creative haxe-binaries.tgz archive for future use"
+    tar zcf haxe-binaries.tgz ./docker_haxe
 fi
-
-mkdir -p ./docker_haxe/
-sudo mkdir -p /usr/local/share/haxe/
-#sudo mkdir -p /usr/local/share/haxe/std
-
-echoSection "running/getting docker image ${TAGNAME}";
-docker run haxe:${TAGNAME}
-
-echoLine "getting CONTAINERID"
-
-CONTAINERID=`docker ps -aq --latest`
-
-echoLine "copying from container: $CONTAINERID"
-docker cp $CONTAINERID:/usr/local/bin/haxe ./docker_haxe/
-docker cp $CONTAINERID:/usr/local/bin/haxelib ./docker_haxe/
-docker cp $CONTAINERID:/usr/local/share/haxe/std  ./docker_haxe/
-
-echoLine "creative haxe-binaries.tgz archive for future use"
-tar zcf haxe-binaries.tgz ./docker_haxe
-
 if [ $INSTALL -eq 1 ] 
 then
     cd ./docker_haxe/
